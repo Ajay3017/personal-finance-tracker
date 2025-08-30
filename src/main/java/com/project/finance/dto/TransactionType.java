@@ -1,5 +1,5 @@
 package com.project.finance.dto;
 
 public enum TransactionType {
-    INCOME, EXPENSE
+    INCOME, EXPENSE, SAVING
 }

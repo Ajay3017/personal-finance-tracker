@@ -8,5 +8,7 @@ public interface TransactionService {
 
     public List<Transaction> getAllTransactions();
 
-    //To DO: Add save & getTransactionByUserId
+    public List<Transaction> getTransactionByUser(Long userId);
+
+    public boolean saveTransaction(Transaction transaction);
 }
