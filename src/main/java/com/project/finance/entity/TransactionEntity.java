@@ -17,16 +17,20 @@ public class TransactionEntity {
     @Column(name = "transId")
     private Long transId;
 
+    @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
     private Double amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="finance_type")
+    @Column(name="finance_type", nullable = false)
     private TransactionType transactionType;
 
-    private String category;
+    @Column(nullable = false)
+    private String category;    // Food, Rent, etc.
 
+    @Column(nullable = false)
     private Timestamp date;
 
     private String note;

@@ -16,12 +16,16 @@ public class UserEntity {
     @Column(name = "userId")
     private Long userId;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, updatable = false)
     private Timestamp createdAt;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userEntity", orphanRemoval = true)
