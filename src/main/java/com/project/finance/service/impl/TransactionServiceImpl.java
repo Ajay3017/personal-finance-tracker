@@ -1,6 +1,8 @@
 package com.project.finance.service.impl;
 
+import com.project.finance.dto.CategoryBreakdown;
 import com.project.finance.dto.Transaction;
+import com.project.finance.dto.TransactionSummary;
 import com.project.finance.dto.TransactionType;
 import com.project.finance.entity.TransactionEntity;
 import com.project.finance.repository.TransactionRepo;
@@ -9,7 +11,9 @@ import com.project.finance.util.TransactionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,15 +78,17 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public double getMonthlyBalance(Long userId, YearMonth month) {
+    public TransactionSummary getMonthlySummary(Long userId, String yearMonthStr) {
 
-        List<TransactionEntity> transactionEntityList = transactionRepo.findByUserEntity_UserId(userId);
+        YearMonth yearMonth = YearMonth.parse(yearMonthStr);
 
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
 
-//        List<TransactionEntity> currentMonthList = transactionEntityList.stream().
-//                filter(entity -> {
-//                    (entity.getDate().toLocalDateTime()).
-//                });
+        Timestamp  startTime = Timestamp.valueOf(start.atStartOfDay());
+        Timestamp endTime = Timestamp.valueOf(end.atTime(LocalTime.MAX));
+
+        List<TransactionEntity> transactionEntityList = transactionRepo.findByUserEntity_UserIdAndDateBetween(userId, startTime, endTime);
 
         double income = transactionEntityList.stream().
                 filter(entity-> entity.getTransactionType().equals(TransactionType.INCOME))
@@ -99,7 +105,22 @@ public class TransactionServiceImpl implements TransactionService {
                 .mapToDouble(TransactionEntity::getAmount)
                 .sum();
 
-        return income-(savings+expense);
+        return new TransactionSummary(income, expense, income-(savings+expense));
     }
+
+    @Override
+    public List<CategoryBreakdown> getCategoryBreakdown(Long userId, String yearMonthStr) {
+
+        YearMonth yearMonth = YearMonth.parse(yearMonthStr);
+
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+
+        Timestamp  startTime = Timestamp.valueOf(start.atStartOfDay());
+        Timestamp endTime = Timestamp.valueOf(end.atTime(LocalTime.MAX));
+
+        return transactionRepo.findByCategory(userId, startTime, endTime);
+    }
+
 
 }

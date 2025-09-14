@@ -38,4 +38,11 @@ public class TransactionEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)
     private UserEntity userEntity;
+
+    @PrePersist
+    void fillDate() {
+        if(this.date == null){
+            this.date = new Timestamp(System.currentTimeMillis());
+        }
+    }
 }

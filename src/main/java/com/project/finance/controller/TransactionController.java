@@ -1,14 +1,14 @@
 package com.project.finance.controller;
 
+import com.project.finance.dto.CategoryBreakdown;
 import com.project.finance.dto.Transaction;
+import com.project.finance.dto.TransactionSummary;
 import com.project.finance.service.impl.TransactionServiceImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Year;
-import java.time.YearMonth;
 import java.util.List;
 
 @RestController
@@ -44,8 +44,13 @@ public class TransactionController {
         return ResponseEntity.ok("Deleted Transaction with id: "+ id);
     }
 
-    @GetMapping("/getMonthlyBalance")
-    public double getMonthlyBalance(@RequestParam Long userId, @RequestParam YearMonth month){
-        return transactionServiceImpl.getMonthlyBalance(userId, month);
+    @GetMapping("/getMonthlySummary")
+    public TransactionSummary getMonthlySummary(@RequestParam Long userId, @RequestParam String yearMonth){
+        return transactionServiceImpl.getMonthlySummary(userId, yearMonth);
+    }
+
+    @GetMapping("/getCategoryBreakdown")
+    public List<CategoryBreakdown> getCategoryBreakdown(@RequestParam Long userId, @RequestParam String yearMonth){
+        return transactionServiceImpl.getCategoryBreakdown(userId, yearMonth);
     }
 }

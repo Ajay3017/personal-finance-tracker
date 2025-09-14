@@ -1,9 +1,9 @@
 package com.project.finance.service;
 
+import com.project.finance.dto.CategoryBreakdown;
 import com.project.finance.dto.Transaction;
+import com.project.finance.dto.TransactionSummary;
 
-import java.time.Year;
-import java.time.YearMonth;
 import java.util.List;
 
 public interface TransactionService {
@@ -18,5 +18,8 @@ public interface TransactionService {
 
     public void deleteTransaction(Long transId);
 
-    public double getMonthlyBalance(Long userId, YearMonth month);
+    public TransactionSummary getMonthlySummary(Long userId, String yearMonth);
+
+    public List<CategoryBreakdown> getCategoryBreakdown(Long userId, String yearMonth);
+
 }
