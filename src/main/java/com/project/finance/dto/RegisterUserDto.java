@@ -8,15 +8,20 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Timestamp;
-
 @Data
 @Builder
-public class User {
+public class RegisterUserDto {
 
-    private Long userId;
+    @NotEmpty(message = "Name cannot be empty")
+    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
-    private String email;
+
+    @NotEmpty
+    @Size(min = 8, max = 64, message = "Password must be between 8 and 64 characters")
     private String password;
-    private Timestamp createdAt;
+
+    @NotEmpty
+    @Email
+    private String email;
+
 }

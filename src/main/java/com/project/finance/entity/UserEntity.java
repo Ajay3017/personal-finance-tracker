@@ -1,7 +1,10 @@
 package com.project.finance.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -9,6 +12,9 @@ import java.util.List;
 @Entity
 @Table(name = "USER")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UserEntity {
 
     @Id
@@ -30,4 +36,17 @@ public class UserEntity {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "userEntity", orphanRemoval = true)
     private List<TransactionEntity> transactionEntityList;
+
+    public UserEntity(String name, String email, String password){
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
+
+    @PrePersist
+    void addCreatedDate() {
+        if(this.createdAt == null){
+            this.createdAt = new Timestamp(System.currentTimeMillis());
+        }
+    }
 }

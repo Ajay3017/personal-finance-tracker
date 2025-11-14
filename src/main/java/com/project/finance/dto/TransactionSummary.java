@@ -11,5 +11,7 @@ public class TransactionSummary {
 
     private double totalExpense;
 
+    private double totalSavings;
+
     private double balance;
 }

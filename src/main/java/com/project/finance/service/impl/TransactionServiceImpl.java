@@ -105,7 +105,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .mapToDouble(TransactionEntity::getAmount)
                 .sum();
 
-        return new TransactionSummary(income, expense, income-(savings+expense));
+        return new TransactionSummary(income, expense, savings,income-(savings+expense));
     }
 
     @Override
