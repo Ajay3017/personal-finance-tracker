@@ -1,8 +1,10 @@
 package com.project.finance.controller;
 
 import com.project.finance.dto.*;
+import com.project.finance.repository.UserRepo;
 import com.project.finance.service.AuthService;
 import com.project.finance.service.JwtService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@SecurityRequirement(name = " ")
 public class AuthController {
 
     @Autowired
@@ -26,10 +29,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> registerUser(@RequestBody @Valid LoginDto userDto){
-        User authenticatedUser = authService.authenticate(userDto);
-        String jwt = jwtService.generateToken(new UserDetailsImpl(authenticatedUser));
-        LoginResponse loginResponse = new LoginResponse(jwt, jwtService.getExpirationTime());
-        return ResponseEntity.ok(loginResponse);
+        LoginResponse response = authService.authenticate(userDto);
+        return ResponseEntity.ok(response);
     }
 
 }

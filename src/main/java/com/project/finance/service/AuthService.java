@@ -1,8 +1,6 @@
 package com.project.finance.service;
 
-import com.project.finance.dto.LoginDto;
-import com.project.finance.dto.RegisterUserDto;
-import com.project.finance.dto.User;
+import com.project.finance.dto.*;
 import com.project.finance.entity.UserEntity;
 import com.project.finance.repository.UserRepo;
 import com.project.finance.util.UserMapper;
@@ -11,6 +9,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +26,9 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
+    private JwtService jwtService;
+
+    @Autowired
     private UserMapper userMapper;
 
     public User signUp(RegisterUserDto userdto){
@@ -40,7 +42,7 @@ public class AuthService {
         return userMapper.getUser(entity);
     }
 
-    public User authenticate(LoginDto loginDto){
+    public LoginResponse authenticate(LoginDto loginDto){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginDto.getName(),
@@ -49,7 +51,9 @@ public class AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return userRepo.findByName(loginDto.getName())
+        User user = userRepo.findByName(loginDto.getName())
                 .orElseThrow();
+        String jwtToken = jwtService.generateToken(new UserDetailsImpl(user));
+        return new LoginResponse(jwtToken, jwtService.getExpirationTime());
     }
 }

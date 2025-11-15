@@ -24,11 +24,11 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getName();
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getPassword();
+        return user.getName();
     }
 }
