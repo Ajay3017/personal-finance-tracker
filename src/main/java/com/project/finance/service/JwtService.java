@@ -27,6 +27,7 @@ public class JwtService {
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
+
     JwtService(){
         try{
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");

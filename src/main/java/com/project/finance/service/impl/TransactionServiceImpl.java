@@ -8,6 +8,7 @@ import com.project.finance.entity.TransactionEntity;
 import com.project.finance.repository.TransactionRepo;
 import com.project.finance.service.TransactionService;
 import com.project.finance.util.TransactionMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +16,11 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
@@ -29,25 +31,22 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<Transaction> getAllTransactions() {
-
+        log.info("In getAllTransactions");
         List<TransactionEntity> transactionEntityList = transactionRepo.findAll();
-        List<Transaction> transactionList = new ArrayList<>();
 
-        transactionEntityList.forEach((transaction) -> {
-            transactionList.add(transactionMapper.getTransaction(transaction));
-        });
-        return transactionList;
+        return transactionEntityList.stream()
+                .map(transactionMapper::getTransaction)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Transaction> getTransactionByUser(Long userId) {
+        log.info("In getTransactionByUser");
         List<TransactionEntity> transactionEntities = transactionRepo.findByUserEntity_UserId(userId);
 
-        List<Transaction> transactions = new ArrayList<Transaction>();
-        transactionEntities.forEach(transactionEntity -> {
-            transactions.add(transactionMapper.getTransaction(transactionEntity));
-        });
-        return transactions;
+        return transactionEntities.stream()
+                .map(transactionMapper::getTransaction)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -10,7 +10,6 @@ public class Transaction {
 
     private Long transId;
 
-    @NotNull
     private Long userId;
 
     @NotEmpty(message = "Title cannot be empty")
@@ -24,7 +23,6 @@ public class Transaction {
     @NotNull
     private TransactionType transactionType;
 
-    @NotEmpty(message = "Category cannot be empty")
     @Size(max=50, message = "Category must not exceed 50 characters")
     private String category;
 
