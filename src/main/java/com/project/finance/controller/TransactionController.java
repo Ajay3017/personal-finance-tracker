@@ -5,6 +5,7 @@ import com.project.finance.dto.Transaction;
 import com.project.finance.dto.TransactionSummary;
 import com.project.finance.service.impl.TransactionServiceImpl;
 import com.project.finance.util.CurrentUserId;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +17,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/transactions")
-@SecurityRequirement(name = "Bearer Authentication")
 @Slf4j
+@SecurityRequirement(name = "bearerAuth")
 public class TransactionController {
 
     @Autowired
@@ -28,35 +29,41 @@ public class TransactionController {
         return transactionServiceImpl.getAllTransactions();
     }
 
-    @GetMapping("/getTransaction")
-    public List<Transaction> getTransaction(@CurrentUserId Long userId){
-        log.info("User Id inside resolver: {}", userId);
+    @GetMapping("/getTransactionByUser")
+    public List<Transaction> getTransactionByUserId(@Parameter(hidden = true) @CurrentUserId Long userId){
         return transactionServiceImpl.getTransactionByUser(userId);
     }
 
     @PostMapping("/saveTransaction")
-    public boolean saveTransaction(@RequestBody @Valid Transaction transaction) {
+    public boolean saveTransaction(@RequestBody @Valid Transaction transaction,
+                                   @Parameter(hidden = true) @CurrentUserId Long userId) {
+        transaction.setUserId(userId);
         return transactionServiceImpl.saveTransaction(transaction);
     }
 
     @PutMapping("/updateTransaction")
-    public Transaction updateTransaction(@RequestParam(required = false) @CurrentUserId Long userId, @RequestBody @Valid Transaction transaction) {
-        return transactionServiceImpl.updateTransaction(userId, transaction);
+    public Transaction updateTransaction(@RequestParam Long transId,
+                                         @Parameter(hidden = true) @CurrentUserId Long userId,
+                                         @RequestBody @Valid Transaction transaction) {
+        transaction.setUserId(userId);
+        return transactionServiceImpl.updateTransaction(transId, transaction);
     }
 
     @PostMapping("/deleteTransaction")
-    public ResponseEntity<String> deleteTransaction(@CurrentUserId Long userId) {
-        transactionServiceImpl.deleteTransaction(userId);
-        return ResponseEntity.ok("Deleted Transaction with id: "+ userId);
+    public ResponseEntity<String> deleteTransaction(@RequestParam Long transId) {
+        transactionServiceImpl.deleteTransaction(transId);
+        return ResponseEntity.ok("Deleted Transaction with id: "+ transId);
     }
 
     @GetMapping("/getMonthlySummary")
-    public TransactionSummary getMonthlySummary(@CurrentUserId Long userId, @RequestParam String yearMonth){
+    public TransactionSummary getMonthlySummary(@Parameter(hidden = true) @CurrentUserId Long userId,
+                                                @RequestParam String yearMonth){
         return transactionServiceImpl.getMonthlySummary(userId, yearMonth);
     }
 
     @GetMapping("/getCategoryBreakdown")
-    public List<CategoryBreakdown> getCategoryBreakdown(@CurrentUserId Long userId, @RequestParam String yearMonth){
+    public List<CategoryBreakdown> getCategoryBreakdown(@Parameter(hidden = true) @CurrentUserId Long userId,
+                                                        @RequestParam String yearMonth){
         return transactionServiceImpl.getCategoryBreakdown(userId, yearMonth);
     }
 }

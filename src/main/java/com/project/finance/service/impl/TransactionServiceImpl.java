@@ -5,6 +5,8 @@ import com.project.finance.dto.Transaction;
 import com.project.finance.dto.TransactionSummary;
 import com.project.finance.dto.TransactionType;
 import com.project.finance.entity.TransactionEntity;
+import com.project.finance.exception.InvalidInputException;
+import com.project.finance.exception.NotFoundException;
 import com.project.finance.repository.TransactionRepo;
 import com.project.finance.service.TransactionService;
 import com.project.finance.util.TransactionMapper;
@@ -42,25 +44,30 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> getTransactionByUser(Long userId) {
         log.info("In getTransactionByUser");
+        validateUserId(userId);
         List<TransactionEntity> transactionEntities = transactionRepo.findByUserEntity_UserId(userId);
 
+        if(transactionEntities.isEmpty()){
+            throw new NotFoundException("No transaction for the given userId: "+ userId);
+        }
         return transactionEntities.stream()
                 .map(transactionMapper::getTransaction)
                 .collect(Collectors.toList());
+
     }
 
     @Override
     public boolean saveTransaction(Transaction transaction) {
-
         TransactionEntity transactionEntity = transactionRepo.save(transactionMapper.getTransactionEntity(transaction));
         return transactionEntity.getTransId() != null;
     }
 
     @Override
-    public Transaction updateTransaction(Long id, Transaction transaction) {
+    public Transaction updateTransaction(Long transId, Transaction transaction) {
+        log.info("In update Transaction");
 
-        TransactionEntity existingEntity = transactionRepo.findById(id).orElseThrow(() ->
-                new RuntimeException("Transaction Not found"));
+        TransactionEntity existingEntity = transactionRepo.findById(transId).orElseThrow(() ->
+                new NotFoundException("Transaction Not found"));
 
         transactionMapper.UpdateToEntity(transaction, existingEntity);
         TransactionEntity savedEntity = transactionRepo.save(existingEntity);
@@ -71,13 +78,14 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void deleteTransaction(Long transId) {
         TransactionEntity existingEntity = transactionRepo.findById(transId).orElseThrow(() ->
-                new RuntimeException("Transaction Not found"));
+                new NotFoundException("Transaction Not found"));
         transactionRepo.deleteById(transId);
-
     }
 
     @Override
     public TransactionSummary getMonthlySummary(Long userId, String yearMonthStr) {
+        log.info("Inside getMonthly summary");
+        validateUserId(userId);
 
         YearMonth yearMonth = YearMonth.parse(yearMonthStr);
 
@@ -87,20 +95,28 @@ public class TransactionServiceImpl implements TransactionService {
         Timestamp  startTime = Timestamp.valueOf(start.atStartOfDay());
         Timestamp endTime = Timestamp.valueOf(end.atTime(LocalTime.MAX));
 
-        List<TransactionEntity> transactionEntityList = transactionRepo.findByUserEntity_UserIdAndDateBetween(userId, startTime, endTime);
+        List<TransactionEntity> transactionEntityList = transactionRepo
+                .findByUserEntity_UserIdAndDateBetween(userId, startTime, endTime);
+
+        if(transactionEntityList.isEmpty()){
+            throw new NotFoundException("No transactions found for userId: "+ userId);
+        }
 
         double income = transactionEntityList.stream().
-                filter(entity-> entity.getTransactionType().equals(TransactionType.INCOME))
+                filter(entity-> entity
+                        .getTransactionType().equals(TransactionType.INCOME))
                 .mapToDouble(TransactionEntity::getAmount)
                 .sum();
 
         double savings = transactionEntityList.stream().
-                filter(entity-> entity.getTransactionType().equals(TransactionType.SAVING))
+                filter(entity-> entity
+                        .getTransactionType().equals(TransactionType.SAVING))
                 .mapToDouble(TransactionEntity::getAmount)
                 .sum();
 
         double expense = transactionEntityList.stream().
-                filter(entity-> entity.getTransactionType().equals(TransactionType.EXPENSE))
+                filter(entity-> entity
+                        .getTransactionType().equals(TransactionType.EXPENSE))
                 .mapToDouble(TransactionEntity::getAmount)
                 .sum();
 
@@ -109,6 +125,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<CategoryBreakdown> getCategoryBreakdown(Long userId, String yearMonthStr) {
+        log.info("In getCategoryBreakdown");
+        validateUserId(userId);
 
         YearMonth yearMonth = YearMonth.parse(yearMonthStr);
 
@@ -121,5 +139,8 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionRepo.findByCategory(userId, startTime, endTime);
     }
 
-
+    void validateUserId(Long userId){
+        if(userId == null || userId <= 0)
+            throw new InvalidInputException("Invalid User Id: " + userId);
+    }
 }
